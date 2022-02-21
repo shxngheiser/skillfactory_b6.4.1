@@ -1,0 +1,22 @@
+- name: Init/Drop Postfix
+  hosts: 1.1.1.1
+  become: yes
+
+  tasks:
+
+  - apt:
+      name: '{{ item }}'
+      state: latest
+    loop:
+      - 'mailutils'
+      - 'postfix'
+    tags: init postfix
+
+  - apt:
+      name: '{{ item }}'
+      state: absent
+      purge: yes
+    loop:
+      - 'mailutils'
+      - 'postfix'
+    tags: drop postfix

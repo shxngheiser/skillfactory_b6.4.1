@@ -1,0 +1,16 @@
+# Более простой вариант генерации ключей.
+# Подразумевалось ли, что я генерирую ключ у себя, зашифровываю его vault'ом и отправляю его на хост в директорию /home/user1/.ssh/ ?
+# Если так, то буду готов переделать
+
+---
+- name: generate SSH key
+  hosts: 1.1.1.1
+  become: yes
+
+  tasks:
+    - name: generate SSH key
+      user:
+        name: "user1"
+        generate_ssh_key: yes
+        ssh_key_file: /home/user1/.ssh/id_rsa
+        force: no
