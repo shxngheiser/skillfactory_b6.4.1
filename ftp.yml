@@ -1,0 +1,20 @@
+# /ansible/playbooks/ftp.yml
+---
+- name: FTP server
+  hosts: 1.1.1.1
+  become: yes
+
+  roles:
+    - ftp
+
+# /ansible/playbooks/roles/ftp/tasks/main.yml
+---
+- name: install vsftpd
+  apt:
+    name: vsftpd
+    state: latest
+
+- name: Start service
+  service:
+    name: vsftpd
+    state: restarted
