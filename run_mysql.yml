@@ -1,0 +1,25 @@
+---
+- name: Install and Run Docker
+  hosts: 1.1.1.1
+  become: yes
+  tasks:
+
+    - apt:
+        name: gnupg
+        state: latest
+
+    - shell: |
+        cd /tmp
+        wget https://dev.mysql.com/get/mysql-apt-config_0.8.13-1_all.deb
+        dpkg -i mysql-apt-config*
+
+    - apt:
+        update_cache: yes
+
+    - apt:
+        name: mysql-server
+        state: latest
+
+    - service:
+        name: mysql
+        state: restarted

@@ -1,0 +1,39 @@
+---
+- name: Install and Run Docker
+  hosts: 1.1.1.1
+  become: yes
+  tasks:
+
+    - apt:
+        name: '{{ item }}'
+        state: latest
+      loop:
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+
+    - shell: |
+        curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        echo \
+        "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+        {{ ansible_distribution_release }} stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    - apt:
+        update_cache: yes
+        name: '{{ item }}'
+        state: latest
+      loop:
+        - 'docker-ce'
+        - 'docker-ce-cli'
+        - 'containerd.io'
+
+    - pip:
+        name: docker
+        executable: pip3
+
+    - community.docker.docker_container:
+        image: hello-world
+        name: hello-world
+        state: started
+      register: output
