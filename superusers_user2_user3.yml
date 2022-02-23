@@ -1,0 +1,26 @@
+---
+- name: superusers: user2, user3
+  hosts: 1.1.1.1
+  become: yes
+  tasks:
+
+    - name: Create group superusers
+      group:
+        name: superusers
+        state: present
+
+    - name: Group to sudoers
+      lineinfile:
+        path: /etc/sudoers
+        line: '%superusers  ALL=(ALL) NOPASSWD:ALL'
+        state: present
+
+    - name: Create users
+      user:
+        name: '{{ item }}'
+        shell: /bin/bash
+        group: superusers
+        state: present
+      loop:
+        - 'user2'
+        - 'user3'

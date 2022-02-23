@@ -1,0 +1,35 @@
+# /ansible/playbooks/dnsmasq.yml
+---
+- name: install and configure dnsmasq
+  hosts: 1.1.1.1
+  become: yes
+
+  roles:
+    - dnsmasq
+
+# /ansible/playbooks/roles/dnsmasq/tasks/main.yml
+---
+- name: install dnsmasq
+  apt:
+    name: dnsmasq
+    state: latest
+
+- name: Create /etc/dnsmasq.d/cache file
+  file:
+    path: /etc/dnsmasq.d/cache
+    state: touch
+
+- name: Configure /etc/dnsmasq.d/cache file
+  lineinfile:
+    path: /etc/dnsmasq.d/cache
+    line: '{{ item }}'
+    state: present
+  loop:
+    - 'cache-size=100'
+    - 'all-servers'
+    - 'no-negcache'
+
+- name: Restart dnsmasq
+  service:
+    name: dnsmasq
+    state: restarted

@@ -1,0 +1,58 @@
+# /ansible/playbooks/nginx_php.yml
+---
+- name: nginx + php-fpm
+  hosts: 1.1.1.1
+  become: yes
+  roles:
+
+    - nginx_php
+
+
+# /ansible/playbooks/roles/nginx_php/tasks/main.yml
+---
+- name: Install nginx and php
+  apt:
+    name: '{{ item }}'
+    state: latest
+  loop:
+    - 'nginx'
+    - 'php'
+    - 'php-fpm'
+
+- name: Delete nginx config file
+  file:
+    path: /etc/nginx/sites-available/default
+    state: absent
+
+- name: Copy nginx config to /etc/nginx/sites-available/default
+  copy:
+    src: nginx
+    dest: /etc/nginx/sites-available/default
+    mode: u+rwx,g+rwx,o+rwx
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+
+# /ansible/playbooks/roles/nginx_php/files/nginx
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        root /var/www/html;
+
+        index index.php index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+        }
+}
