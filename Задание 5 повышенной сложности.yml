@@ -1,0 +1,60 @@
+# /ansible/playbooks/task5.yml
+---
+- hosts: 1.1.1.1
+  become: yes
+
+  roles:
+    - users
+    - http
+    - php
+
+
+# /ansible/playbooks/roles/task5/tasks/main.yml
+---
+- name: generate SSH key
+    user:
+      name: "user1"
+      generate_ssh_key: yes
+      ssh_key_file: /home/user1/.ssh/id_rsa
+      force: no
+
+# /ansible/playbooks/roles/http/tasks/main.yml
+---
+- copy:
+    src: nginx
+    dest: /etc/nginx/sites-available/default
+    mode: u+rwx,g+rwx,o+rwx
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+# /ansible/playbooks/roles/http/files/nginx
+server {
+        listen 9000 default_server;
+        listen [::]:9000 default_server;
+
+        root /var/www/html;
+
+        index index.php index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+        }
+}
+
+# /ansible/playbooks/roles/php/tasks/main.yml
+---
+- lineinfile:
+    path: /etc/php/7.0/fpm/pool.d/www.conf
+    regexp: "^listen ="
+    line: listen = 127.0.0.1:9000
+    state: present
